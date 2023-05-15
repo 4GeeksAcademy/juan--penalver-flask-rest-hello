@@ -106,7 +106,7 @@ def post_planet():
     response_body = {"msg": "Planet inserted successfully"}
     return jsonify(response_body), 200
 
-@app.route('/favourite/planet/<int:planet_id>', methods=['POST'])
+@app.route('/favourite/user/<int:user_id>/planet/<int:planet_id>', methods=['POST'])
 def add_favourite_planet(planet_id):
     # Capturamos la informacion del request body y accedemos a planet_ud id
  
@@ -140,7 +140,7 @@ def post_people():
     return jsonify(response_body), 200
 
 
-@app.route('/favourite/people/<int:people_id>', methods=['POST'])
+@app.route('/favourite/user/<int:user_id>/people/<int:people_id>', methods=['POST'])
 def add_favourite_people(people_id):
     # Capturamos la informacion del request body y accedemos a planet_ud id
  
@@ -156,6 +156,30 @@ def add_favourite_people(people_id):
     }
 
     return jsonify(response_body), 200
+
+
+
+@app.route('/favorite/user/<int:user_id>/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(planet_id):
+    if planet_id in favorites:
+        del favorites[planet_id]
+        return jsonify({'message': f'Favorite planet with id {planet_id} deleted successfully'})
+    else:
+        return jsonify({'error': f'Favorite planet with id {planet_id} not found'}), 404
+
+if __name__ == '__main__':
+    app.run()
+
+@app.route('/favorite/user/<int:user_id>/people/<int:people_id>', methods=['DELETE'])
+def delete_favorite_people(people_id):
+    if people_id in favorites:
+        del favorites[people_id]
+        return jsonify({'message': f'Favorite people with id {people_id} deleted successfully'})
+    else:
+        return jsonify({'error': f'Favorite people with id {people_id} not found'}), 404
+
+if __name__ == '__main__':
+    app.run()
 
 
 
