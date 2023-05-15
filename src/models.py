@@ -53,3 +53,26 @@ class People(db.Model):
             "description": self.description
             # do not serialize the password, its a security breach
         }
+
+class Favourite(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'), nullable=True)
+    people_id = db.Column(db.Integer, db.ForeignKey('people.id'), nullable=True)
+   
+    #TODO: Tendreis que establecer esta relacion con la tabla People
+    #people_id = db.Column(db.Integer, db.ForeignKey('planet.id'), nullable=True)
+
+    planet = db.relationship('Planet')
+    people = db.relationship('People')
+
+    def __repr__(self):
+        return f'<Favourite {self.id}>'
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'planet': self.planet.serialize() if self.planet else None,
+            'people': self.people.serialize() if self.people else None,
+        }

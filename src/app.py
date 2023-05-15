@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Planet, People
+from models import db, User, Planet, People, Favourite
 #from models import Person
 
 app = Flask(__name__)
@@ -47,11 +47,33 @@ def get_user():
 
     return jsonify(response_body), 200
 
+@app.route('/users/favourites', methods=['GET'])
+def get_user_favourites():
+    
+    user = User.query.get(current_logged_user_id)
+    favourites = user.favourites
+    serialized_favourites = [f.serialize() for f in favourites]
+
+    response_body = {
+        "msg": f"Aqui tienes los favoritos de {user.email}",
+        "favourites": serialized_favorites
+    }
+
+    return jsonify(response_body), 200
+
+
 @app.route('/planet', methods=['GET'])
 def get_planets():
     allPlanets = Planet.query.all()
     result = [element.serialize() for element in allPlanets]
     return jsonify(result), 200
+
+@app.route('/planet/<int:planet_id>', methods=['GET'])
+def get_planet(planet_id):
+    planet = Planet.query.get(planet_id)
+    if not planet:
+        raise APIException('Planet not found', status_code=404)
+    return jsonify(planet.serialize()), 200
 
 
 @app.route('/people', methods=['GET'])
@@ -59,6 +81,14 @@ def get_people():
     allPeople = People.query.all()
     result = [element.serialize() for element in allPeople]
     return jsonify(result), 200
+
+@app.route('/people/<int:people_id>', methods=['GET'])
+def get_person(people_id):
+    person = People.query.get(people_id)
+    if not person:
+        raise APIException('Person not found', status_code=404)
+
+    return jsonify(person.serialize()), 200
 
 @app.route('/planet', methods=['POST'])
 def post_planet():
@@ -76,6 +106,23 @@ def post_planet():
     response_body = {"msg": "Planet inserted successfully"}
     return jsonify(response_body), 200
 
+@app.route('/favourite/planet/<int:planet_id>', methods=['POST'])
+def add_favourite_planet(planet_id):
+    # Capturamos la informacion del request body y accedemos a planet_ud id
+ 
+    user = User.query.get(current_logged_user_id)
+
+    new_favourite = Favourite(user_id=current_logged_user_id, planet_id=planet_id)
+    db.session.add(new_favourite)
+    db.session.commit()
+
+    response_body = {
+        "msg": "Favorito agregado correctamente", 
+        "favourite": new_favourite.serialize()
+    }
+
+    return jsonify(response_body), 200
+
 @app.route('/people', methods=['POST'])
 def post_people():
 
@@ -90,6 +137,24 @@ def post_people():
     db.session.commit()
 
     response_body = {"msg": "People inserted successfully"}
+    return jsonify(response_body), 200
+
+
+@app.route('/favourite/people/<int:people_id>', methods=['POST'])
+def add_favourite_people(people_id):
+    # Capturamos la informacion del request body y accedemos a planet_ud id
+ 
+    user = User.query.get(current_logged_user_id)
+
+    new_favourite = Favourite(user_id=current_logged_user_id, people_id=people_id)
+    db.session.add(new_favourite)
+    db.session.commit()
+
+    response_body = {
+        "msg": "Favorito agregado correctamente", 
+        "favourite": new_favourite.serialize()
+    }
+
     return jsonify(response_body), 200
 
 
